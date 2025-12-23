@@ -14,22 +14,23 @@
         --orange-primary: #f97316;
         --orange-dark: #ea580c;
 
-        /* Light Mode */
-        --bg-main: #ffffff;
-        --bg-soft: #f9fafb;
-        --text-main: #1f2937;
-        --text-muted: #6b7280;
-        --card-bg: #ffffff;
-        --border-color: #e5e7eb;
-    }
-
-    body.dark-mode {
+        /* Dark Mode */
         --bg-main: #0f172a;
         --bg-soft: #020617;
         --text-main: #e5e7eb;
         --text-muted: #94a3b8;
         --card-bg: #020617;
         --border-color: #1e293b;
+        
+    }
+
+    body.light-mode {
+        --bg-main: #ffffff;
+        --bg-soft: #f9fafb;
+        --text-main: #1f2937;
+        --text-muted: #6b7280;
+        --card-bg: #ffffff;
+        --border-color: #e5e7eb;
     }
 
     body {
@@ -385,7 +386,27 @@
         justify-content: center;
         font-size: 1.4rem;
         cursor: pointer;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+        box-shadow: 0 0 25px rgba(249, 115, 22, 0.5);
+        transition: all 0.3s ease;
+        z-index: 999;
+        border: none;
+    }
+
+    .help-button1 {
+        position: fixed;
+        bottom: 2rem;
+        right: 1rem;
+        width: 52px;
+        height: 52px;
+        background-color: var(--blue-primary);
+        color: var(--orange-primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        cursor: pointer;
+        box-shadow: 0 0 25px rgba(249, 115, 22, 0.5);
         transition: all 0.3s ease;
         z-index: 999;
         border: none;
@@ -397,8 +418,8 @@
         transform: scale(1.08);
     }
 
-    body.dark-mode .help-button {
-        box-shadow: 0 0 25px rgba(249, 115, 22, 0.5);
+    body.light-mode .help-button {
+        box-shadow: 0 6px 20px rgba(0,0,0,0.35);
     }
 
     /* Mobile Responsiveness */
@@ -561,40 +582,40 @@
 
             <div class="row g-4">
                 <!-- AquaSense -->
+                <?php foreach ($projects as $project): ?>
                 <div class="col-md-6">
                     <div class="project-card">
                         <div class="project-image-container">
-                            <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&fit=crop"
-                                alt="AquaSense Monitoring System"
+                            <img src="<?= esc($project['image_url']) ?>"
+                                alt="<?= esc($project['title']) ?>"
                                 class="project-image">
                         </div>
 
                         <div class="project-content">
-                            <h3 class="project-title">AquaSense</h3>
+                            <h3 class="project-title"><?= esc($project['title']) ?></h3>
 
                             <p class="project-description">
-                                A sensor-based water monitoring and alert system that collects,
-                                processes, and visualizes real-time data. Includes threshold-based
-                                alerts, device logging, and an admin dashboard for system control.
+                                <?= esc($project['description']) ?>
                             </p>
 
                             <div class="tech-badges">
-                                <span class="tech-badge">PHP</span>
-                                <span class="tech-badge">CodeIgniter 4</span>
-                                <span class="tech-badge">MySQL</span>
-                                <span class="tech-badge">REST API</span>
-                                <span class="tech-badge">AJAX</span>
-                                <span class="tech-badge">Docker</span>
+                                <?php 
+                                $techs = explode(',', $project['technologies']);
+                                foreach ($techs as $tech): 
+                                ?>
+                                    <span class="tech-badge"><?= esc(trim($tech)) ?></span>
+                                <?php endforeach; ?>
                             </div>
 
                             <div class="project-links">
-                                <a href="#" class="btn btn-project">
+                                <a href="<?= esc($project['github_url']) ?>" target="_blank" class="btn btn-project">
                                     <i class="bi bi-github me-1"></i>Code
                                 </a>
                             </div>
                         </div>
                     </div>
                 </div>
+                <?php endforeach; ?>
 
                 <!-- FarmEase / Farmis -->
                 <div class="col-md-6">
@@ -784,25 +805,25 @@
         const toggleIcon = document.querySelector('#darkModeToggle i');
 
         toggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
+            document.body.classList.toggle('light-mode');
             
             // Change icon
-            if (document.body.classList.contains('dark-mode')) {
-                toggleIcon.className = 'bi bi-sun-fill';
-            } else {
+            if (document.body.classList.contains('light-mode')) {
                 toggleIcon.className = 'bi bi-moon-stars-fill';
+            } else {
+                toggleIcon.className = 'bi bi-sun-fill';
             }
             
             // Save preference
             localStorage.setItem(
                 'theme',
-                document.body.classList.contains('dark-mode') ? 'dark' : 'light'
+                document.body.classList.contains('light-mode') ? 'light' : 'dark'
             );
         });
 
         // Load saved theme
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.classList.add('dark-mode');
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
             toggleIcon.className = 'bi bi-sun-fill';
         }
     </script>
