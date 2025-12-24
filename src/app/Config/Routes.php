@@ -14,4 +14,6 @@ $routes->group('admin', function (RouteCollection $routes) {
     $routes->post('delete/(:num)', 'Admin::delete/$1');
 });
 
+$routes->post('contact/send', 'Contact::sendMessage');
+
 

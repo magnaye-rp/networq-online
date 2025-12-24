@@ -28,101 +28,86 @@ class Admin extends BaseController
 
     public function create()
     {
-        // Only allow POST method
-        if ($this->request->getMethod() === 'post') {
-            // Define validation rules
-            $rules = [
-                'project_name' => 'required|min_length[3]|max_length[255]',
-                'description' => 'required',
-                'technology_stack' => 'required',
-                'github_link' => 'permit_empty|valid_url',
-                'live_demo_link' => 'permit_empty|valid_url'
-            ];
+        $projectData = [
+            'project_name' => $this->request->getPost('project_name'),
+            'description' => $this->request->getPost('description'),
+            'technology_stack' => $this->request->getPost('technology_stack'),
+            'github_link' => $this->request->getPost('github_link') ?: null,
+            'live_demo_link' => $this->request->getPost('live_demo_link') ?: null,
+        ];
 
-            // Run validation
-            if (!$this->validate($rules)) {
-                return redirect()->back()
-                    ->withInput()
-                    ->with('errors', $this->validator->getErrors());
+        $imagesData = [];
+        $uploadPath = FCPATH . 'uploads/projects/';
+        
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0755, true);
+        }
+
+        // Get all uploaded files dynamically
+        $files = $this->request->getFiles();
+
+        $imagesData = []; 
+
+        foreach ($files as $key => $fileArray) {
+            if (!is_array($fileArray)) {
+                $fileArray = [$fileArray];
             }
-
-            // Handle file uploads
-            $imagesData = [];
-            $uploadPath = FCPATH . 'uploads/projects/';
             
-            // Create upload directory if it doesn't exist
-            if (!is_dir($uploadPath)) {
-                mkdir($uploadPath, 0755, true);
-            }
+            foreach ($fileArray as $index => $file) {
 
-            // Process up to 3 image uploads
-            for ($i = 1; $i <= 3; $i++) {
-                $file = $this->request->getFile("image_$i");
+                if (!is_object($file)) {
+                    log_message('error', "File at index [$key][$index] is not an object");
+                    continue;
+                }
                 
-                if ($file && $file->isValid() && !$file->hasMoved()) {
-                    // Validate file type
-                    $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!$file->isValid()) {
+                    log_message('error', "File at index [$key][$index] is not valid");
+                    continue;
+                }
+                
+                $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                
+                try {
                     if (!in_array($file->getMimeType(), $allowedTypes)) {
-                        return redirect()->back()
-                            ->withInput()
-                            ->with('error', "Invalid file type for image $i. Only JPG, PNG, and GIF files are allowed.");
+                        continue; 
                     }
-
-                    // Validate file size (5MB max - adjusted from 100MB for security)
-                    if ($file->getSize() > 100 * 1024 * 1024) {
-                        return redirect()->back()
-                            ->withInput()
-                            ->with('error', "File size for image $i exceeds 5MB limit.");
+                    if ($file->getSize() > 5 * 1024 * 1024) {
+                        continue; 
                     }
-
-                    // Generate unique filename
+                    
                     $newName = $file->getRandomName();
                     
-                    // Move uploaded file
                     if ($file->move($uploadPath, $newName)) {
                         $imagesData[] = [
                             'image_path' => 'uploads/projects/' . $newName,
                             'uploaded_at' => date('Y-m-d H:i:s')
                         ];
+                        
+                        // Debug: Verify array is growing
+                        echo "Added file #$count: $newName<br>";
                     } else {
-                        return redirect()->back()
-                            ->withInput()
-                            ->with('error', "Failed to upload image $i.");
+                        log_message('error', "Failed to move file: " . $file->getName());
                     }
+                } catch (\Exception $e) {
+                    log_message('error', "Error processing file: " . $e->getMessage());
+                    continue;
                 }
-            }
-
-            // Prepare project data
-            $projectData = [
-                'project_name' => $this->request->getPost('project_name'),
-                'description' => $this->request->getPost('description'),
-                'technology_stack' => $this->request->getPost('technology_stack'),
-                'github_link' => $this->request->getPost('github_link') ?: null,
-                'live_demo_link' => $this->request->getPost('live_demo_link') ?: null,
-            ];
-
-            // Use the model method to add project with images
-            try {
-                if ($this->projectModel->addProjectWithImages($projectData, $imagesData)) {
-                    return redirect()->to('/admin')
-                        ->with('success', 'Project added successfully!');
-                } else {
-                    return redirect()->back()
-                        ->withInput()
-                        ->with('error', 'Failed to add project. Please try again.');
-                }
-            } catch (\Exception $e) {
-                // Log the error if needed
-                log_message('error', 'Project creation failed: ' . $e->getMessage());
-                
-                return redirect()->back()
-                    ->withInput()
-                    ->with('error', 'An error occurred while adding the project.');
             }
         }
 
-        // If not POST request, redirect to admin
-        return redirect()->to('/admin');
+// Debug: Check final result
+// print_r($imagesData);
+// echo "Total files processed: $count";
+        
+        $result = $this->projectModel->addProjectWithImages($projectData, $imagesData);
+
+        if ($result) {
+            return redirect()->to('/admin')->with('success', 'Project added successfully with ' . count($imagesData) . ' images!');
+        } else {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Failed to add project. Please try again.');
+        }
     }
 
     public function delete($id)

@@ -361,7 +361,7 @@
                 <!-- Image Upload Section -->
                 <div class="mb-4">
                     <label class="form-label">Project Images (Up to 3 images)</label>
-                    <div class="form-text mb-3">Supported formats: JPG, PNG, GIF. Maximum size: 100MB per image</div>
+                    <div class="form-text mb-3">Supported formats: JPG, PNG, GIF. Maximum size: 5mb per image</div>
                     
                     <div class="row">
                         <div class="col-md-4">

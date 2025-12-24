@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio - Full Stack Developer</title>
+    <title>Portfolio - Ryan Paulo Magnaye</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 <style>
@@ -329,6 +329,66 @@
         margin: 0 auto;
     }
 
+    .contact-form {
+        background: var(--bg-soft);
+        border-radius: 1rem;
+        border: 1px solid var(--border-color);
+        padding: 2.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 100%;
+    }
+
+    .form-floating > .form-control,
+    .form-floating > .form-select {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        transition: all 0.3s;
+    }
+
+    .form-floating > .form-control:focus,
+    .form-floating > .form-select:focus {
+        border-color: var(--orange-primary);
+        box-shadow: 0 0 0 0.2rem rgba(249, 115, 22, 0.25);
+    }
+
+    .form-floating > label {
+        color: var(--text-muted);
+    }
+
+    .form-control:focus {
+        color: var(--text-main);
+        background-color: var(--card-bg);
+        border-color: var(--orange-primary);
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(249, 115, 22, 0.25);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-muted);
+    }
+
+    .btn-contact {
+        background-color: var(--orange-primary);
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        border: none;
+        font-weight: 500;
+        transition: all 0.3s;
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .btn-contact:hover {
+        background-color: var(--orange-dark);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+    }
+
     .contact-title {
         font-size: 1.75rem;
         font-weight: 600;
@@ -500,6 +560,8 @@
             font-size: 0.9rem;
         }
     }
+
+    
 </style>
 </head>
 <body>
@@ -581,18 +643,64 @@
             </p>
 
             <div class="row g-4">
-                <!-- AquaSense -->
                 <?php foreach ($projects as $project): ?>
                 <div class="col-md-6">
                     <div class="project-card">
                         <div class="project-image-container">
-                            <img src="<?= esc($project['image_url']) ?>"
-                                alt="<?= esc($project['title']) ?>"
-                                class="project-image">
+                            <!-- Use unique ID for each carousel -->
+                            <div id="carousel-<?= $project['id'] ?>" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    <?php if (empty($project['images'])): ?>
+                                        <!-- Default if no images -->
+                                        <div class="carousel-item active">
+                                            <img src="https://via.placeholder.com/800x450?text=No+Image" 
+                                                class="d-block w-100 project-image" 
+                                                alt="<?= esc($project['project_name']) ?>">
+                                        </div>
+                                    <?php else: ?>
+                                        <?php foreach ($project['images'] as $index => $image): ?>
+                                            <div class="carousel-item <?= ($index === 0) ? 'active' : '' ?>">
+                                                <img src="<?= base_url(esc($image['image_path'])) ?>" 
+                                                    class="d-block w-100 project-image" 
+                                                    alt="<?= esc($project['project_name']) ?> - Image <?= $index + 1 ?>"
+                                                    loading="lazy">
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <?php if (!empty($project['images']) && count($project['images']) > 1): ?>
+                                    <!-- Controls -->
+                                    <button class="carousel-control-prev" type="button" 
+                                            data-bs-target="#carousel-<?= $project['id'] ?>" 
+                                            data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" 
+                                            data-bs-target="#carousel-<?= $project['id'] ?>" 
+                                            data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Next</span>
+                                    </button>
+                                    
+                                    <!-- Indicators -->
+                                    <div class="carousel-indicators">
+                                        <?php foreach ($project['images'] as $index => $image): ?>
+                                            <button type="button" 
+                                                    data-bs-target="#carousel-<?= $project['id'] ?>" 
+                                                    data-bs-slide-to="<?= $index ?>" 
+                                                    class="<?= ($index === 0) ? 'active' : '' ?>" 
+                                                    aria-label="Slide <?= $index + 1 ?>"></button>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         </div>
-
+                        
+                        <!-- Project details here -->
                         <div class="project-content">
-                            <h3 class="project-title"><?= esc($project['title']) ?></h3>
+                            <h3 class="project-title"><?= esc($project['project_name']) ?></h3>
 
                             <p class="project-description">
                                 <?= esc($project['description']) ?>
@@ -600,7 +708,7 @@
 
                             <div class="tech-badges">
                                 <?php 
-                                $techs = explode(',', $project['technologies']);
+                                $techs = explode(',', $project['technology_stack']);
                                 foreach ($techs as $tech): 
                                 ?>
                                     <span class="tech-badge"><?= esc(trim($tech)) ?></span>
@@ -608,51 +716,19 @@
                             </div>
 
                             <div class="project-links">
-                                <a href="<?= esc($project['github_url']) ?>" target="_blank" class="btn btn-project">
+                                <a href="<?= esc($project['github_link']) ?>" target="_blank" class="btn btn-project">
                                     <i class="bi bi-github me-1"></i>Code
                                 </a>
+                                <?php if (!empty($project['live_demo_link'])): ?>
+                                <a href="<?= esc($project['live_demo_link']) ?>" target="_blank" class="btn btn-project">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i>Live Demo
+                                </a>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
                 </div>
                 <?php endforeach; ?>
-
-                <!-- FarmEase / Farmis -->
-                <div class="col-md-6">
-                    <div class="project-card">
-                        <div class="project-image-container">
-                            <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&h=500&fit=crop"
-                                alt="FarmEase Booking System"
-                                class="project-image">
-                        </div>
-
-                        <div class="project-content">
-                            <h3 class="project-title">FarmEase (Venue Booking System)</h3>
-
-                            <p class="project-description">
-                                A web-based venue and event booking management system with
-                                role-based access for clients, staff, and administrators.
-                                Features booking workflows, package management, audit logs,
-                                and staff assignment tracking.
-                            </p>
-
-                            <div class="tech-badges">
-                                <span class="tech-badge">PHP</span>
-                                <span class="tech-badge">CodeIgniter 4</span>
-                                <span class="tech-badge">MySQL</span>
-                                <span class="tech-badge">CodeIgniter Shield</span>
-                                <span class="tech-badge">RBAC</span>
-                                <span class="tech-badge">Docker</span>
-                            </div>
-
-                            <div class="project-links">
-                                <a href="#" class="btn btn-project">
-                                    <i class="bi bi-github me-1"></i>Code
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
@@ -720,23 +796,70 @@
                 I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision.
             </p>
             
-            <div class="contact-card">
-                <h3 class="contact-title">Let's Connect</h3>
-                <p class="contact-subtitle">Feel free to reach out through any of these platforms</p>
-                
-                <div class="contact-item">
-                    <i class="bi bi-envelope-fill"></i>
-                    <a href="mailto:magnaye.rp@gmail.com">magnaye.rp@gmail.com</a>
+            <div class="row g-4">
+                <div class="col-md-6 d-flex">
+                    <div class="contact-card h-100 w-100">
+                        <h3 class="contact-title">Let's Connect</h3>
+                        <p class="contact-subtitle">Feel free to reach out through any of these platforms</p>
+                        
+                        <div class="contact-item">
+                            <i class="bi bi-envelope-fill"></i>
+                            <a href="mailto:magnaye.rp@gmail.com">magnaye.rp@gmail.com</a>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <i class="bi bi-github"></i>
+                            <a href="https://github.com/magnaye-rp" target="_blank">github.com/magnaye-rp</a>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <i class="bi bi-linkedin"></i>
+                            <a href="https://linkedin.com/in/magnaye-rp" target="_blank">linkedin.com/in/magnaye-rp</a>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <i class="bi bi-facebook"></i>
+                            <a href="https://www.facebook.com/bruhdacious" target="_blank">facebook.com/bruhdacious</a>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <i class="bi bi-instagram"></i>
+                            <a href="https://www.instagram.com/bruhdacious" target="_blank">instagram.com/bruhdacious</a>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="contact-item">
-                    <i class="bi bi-github"></i>
-                    <a href="https://github.com/magnaye-rp" target="_blank">github.com/magnaye-rp</a>
-                </div>
-                
-                <div class="contact-item">
-                    <i class="bi bi-linkedin"></i>
-                    <a href="https://linkedin.com/in/magnaye-rp" target="_blank">linkedin.com/in/magnaye-rp</a>
+                <div class="col-md-6 d-flex">
+                    <div class="contact-form h-100 w-100">
+                        <h4 class="contact-title mb-4">Send Me a Message</h4>
+                        <form id="contactForm" action="/contact/send" method="POST">
+                            <div class="row g-4">
+                                <div class="col-12">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" id="name" name="name" placeholder="Your Name" required>
+                                        <label for="name">Name</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating mb-3">
+                                        <input type="email" class="form-control" id="email" name="email" placeholder="Your Email" required>
+                                        <label for="email">Email Address</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating mb-4">
+                                        <textarea class="form-control" id="message" name="message" placeholder="Your Message" style="height: 140px" required></textarea>
+                                        <label for="message">Message</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-contact">
+                                        <i class="bi bi-send-fill me-2"></i>Send Message
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -825,6 +948,104 @@
         if (localStorage.getItem('theme') === 'light') {
             document.body.classList.add('light-mode');
             toggleIcon.className = 'bi bi-sun-fill';
+        }
+
+        // Contact form handling
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('.btn-contact');
+            const originalText = submitBtn.innerHTML;
+            const formData = new FormData(this);
+            
+            // Basic validation
+            const name = formData.get('name').trim();
+            const email = formData.get('email').trim();
+            const message = formData.get('message').trim();
+            
+            if (!name || !email || !message) {
+                showNotification('Please fill in all fields.', 'error');
+                return;
+            }
+            
+            if (!isValidEmail(email)) {
+                showNotification('Please enter a valid email address.', 'error');
+                return;
+            }
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Sending...';
+            
+            try {
+                // Submit form to backend
+                const response = await fetch('/contact/send', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Reset form
+                    this.reset();
+                    showNotification(result.message, 'success');
+                } else {
+                    showNotification(result.message, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Form submission error:', error);
+                showNotification('Sorry, there was an error sending your message. Please try again.', 'error');
+            } finally {
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+        
+        // Email validation function
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        // Notification system
+        function showNotification(message, type = 'info') {
+            // Remove existing notifications
+            const existingNotification = document.querySelector('.form-notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `form-notification alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            `;
+            
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
         }
     </script>
 </body>

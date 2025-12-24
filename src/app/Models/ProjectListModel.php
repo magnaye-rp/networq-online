@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
+use App\Models\ProjectImagesModel;
 
 class ProjectListModel extends Model
 {
@@ -80,15 +81,15 @@ class ProjectListModel extends Model
 
         // Insert images data only if there are images
         if (!empty($imagesData)) {
-            $projectImagesModel = new ProjectImagesModel();
             foreach ($imagesData as &$image) {
                 $image['project_id'] = $projectId;
             }
-            $projectImagesModel->insertBatch($imagesData);
+            
+            $this->db->table('project_images')->insertBatch($imagesData);
         }
 
         $this->db->transComplete();
 
-        return $this->db->transStatus();
+        return $this->db->transStatus() ? $projectId : false;
     }
 }
