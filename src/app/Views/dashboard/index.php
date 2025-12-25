@@ -167,6 +167,7 @@
     }
 
     .projects-section,
+    .certificates-section,
     .skills-section,
     .contact-section {
         padding: 5rem 0;
@@ -282,6 +283,116 @@
         background-color: var(--orange-primary);
         color: white;
         border-color: var(--orange-primary);
+    }
+
+    .certificate-card {
+        background: var(--card-bg);
+        border-radius: 1.2rem;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        position: relative;
+        transition: transform 0.3s, box-shadow 0.3s;
+        height: 100%;
+    }
+
+    .certificate-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    .certificate-image-container {
+        position: relative;
+        height: 240px;
+        overflow: hidden;
+        background-color: var(--bg-soft);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .certificate-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .certificate-card:hover .certificate-image {
+        transform: scale(1.05);
+    }
+
+    .certificate-placeholder {
+        font-size: 4rem;
+        color: var(--text-muted);
+        background: linear-gradient(135deg, var(--blue-primary), var(--orange-primary));
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .certificate-content {
+        padding: 1.75rem;
+    }
+
+    .certificate-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        color: var(--text-main);
+    }
+
+    .certificate-description {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: var(--text-muted);
+        margin-bottom: 1.25rem;
+    }
+
+    .certificate-dates {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .date-item {
+        display: flex;
+        align-items: center;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .date-item i {
+        margin-right: 0.5rem;
+        color: var(--orange-primary);
+        width: 16px;
+    }
+
+    .date-label {
+        font-weight: 500;
+        margin-right: 0.5rem;
+        color: var(--text-main);
+    }
+
+    .certificate-status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        border-radius: 999px;
+        margin-top: 0.5rem;
+    }
+
+    .status-valid {
+        background-color: rgba(34, 197, 94, 0.12);
+        color: #22c55e;
+        border: 1px solid rgba(34, 197, 94, 0.25);
+    }
+
+    .status-expired {
+        background-color: rgba(239, 68, 68, 0.12);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.25);
     }
 
     .skill-card,
@@ -514,6 +625,7 @@
         }
         
         .projects-section,
+        .certificates-section,
         .skills-section,
         .contact-section {
             padding: 3rem 0;
@@ -579,6 +691,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#projects">Projects</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#certificates">Certificates</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#skills">Skills</a>
@@ -729,6 +844,166 @@
                     </div>
                 </div>
                 <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- Certificates Section -->
+    <section id="certificates" class="certificates-section">
+        <div class="container">
+            <h2 class="section-title">Professional Certifications</h2>
+            <p class="section-description">
+                Industry-recognized certifications that validate my expertise and commitment to continuous learning
+            </p>
+
+            <div class="row g-4">
+                <!-- AWS Solutions Architect -->
+                <div class="col-md-6">
+                    <div class="certificate-card">
+                        <div class="certificate-image-container">
+                            <div class="certificate-placeholder">
+                                <i class="bi bi-award-fill"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="certificate-content">
+                            <h3 class="certificate-title">AWS Certified Solutions Architect</h3>
+
+                            <p class="certificate-description">
+                                Demonstrates expertise in designing distributed systems and applications on the AWS platform. 
+                                Covers architecture best practices, security, and cost optimization strategies.
+                            </p>
+
+                            <div class="certificate-dates">
+                                <div class="date-item">
+                                    <i class="bi bi-calendar-check"></i>
+                                    <span class="date-label">Issued:</span>
+                                    <span>January 2024</span>
+                                </div>
+                                <div class="date-item">
+                                    <i class="bi bi-calendar-x"></i>
+                                    <span class="date-label">Expires:</span>
+                                    <span>January 2027</span>
+                                </div>
+                            </div>
+
+                            <span class="certificate-status status-valid">
+                                <i class="bi bi-check-circle-fill me-1"></i>Valid
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PHP Professional Certification -->
+                <div class="col-md-6">
+                    <div class="certificate-card">
+                        <div class="certificate-image-container">
+                            <div class="certificate-placeholder">
+                                <i class="bi bi-code-slash"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="certificate-content">
+                            <h3 class="certificate-title">PHP Professional Certification</h3>
+
+                            <p class="certificate-description">
+                                Advanced certification covering modern PHP development practices, 
+                                security best practices, and framework utilization for enterprise applications.
+                            </p>
+
+                            <div class="certificate-dates">
+                                <div class="date-item">
+                                    <i class="bi bi-calendar-check"></i>
+                                    <span class="date-label">Issued:</span>
+                                    <span>March 2023</span>
+                                </div>
+                                <div class="date-item">
+                                    <i class="bi bi-calendar-x"></i>
+                                    <span class="date-label">Expires:</span>
+                                    <span>March 2026</span>
+                                </div>
+                            </div>
+
+                            <span class="certificate-status status-valid">
+                                <i class="bi bi-check-circle-fill me-1"></i>Valid
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Docker Containerization Specialist -->
+                <div class="col-md-6">
+                    <div class="certificate-card">
+                        <div class="certificate-image-container">
+                            <div class="certificate-placeholder">
+                                <i class="bi bi-box-seam"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="certificate-content">
+                            <h3 class="certificate-title">Docker Containerization Specialist</h3>
+
+                            <p class="certificate-description">
+                                Specialized certification in container technologies, covering Docker containerization, 
+                                orchestration, and deployment strategies for scalable applications.
+                            </p>
+
+                            <div class="certificate-dates">
+                                <div class="date-item">
+                                    <i class="bi bi-calendar-check"></i>
+                                    <span class="date-label">Issued:</span>
+                                    <span>September 2023</span>
+                                </div>
+                                <div class="date-item">
+                                    <i class="bi bi-calendar-x"></i>
+                                    <span class="date-label">Expires:</span>
+                                    <span>September 2025</span>
+                                </div>
+                            </div>
+
+                            <span class="certificate-status status-valid">
+                                <i class="bi bi-check-circle-fill me-1"></i>Valid
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CodeIgniter 4 Framework Expert -->
+                <div class="col-md-6">
+                    <div class="certificate-card">
+                        <div class="certificate-image-container">
+                            <div class="certificate-placeholder">
+                                <i class="bi bi-gear-fill"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="certificate-content">
+                            <h3 class="certificate-title">CodeIgniter 4 Framework Expert</h3>
+
+                            <p class="certificate-description">
+                                Expert-level certification demonstrating mastery of CodeIgniter 4 framework, 
+                                MVC architecture, and advanced PHP development patterns for web applications.
+                            </p>
+
+                            <div class="certificate-dates">
+                                <div class="date-item">
+                                    <i class="bi bi-calendar-check"></i>
+                                    <span class="date-label">Issued:</span>
+                                    <span>November 2023</span>
+                                </div>
+                                <div class="date-item">
+                                    <i class="bi bi-calendar-x"></i>
+                                    <span class="date-label">Expires:</span>
+                                    <span>November 2026</span>
+                                </div>
+                            </div>
+
+                            <span class="certificate-status status-valid">
+                                <i class="bi bi-check-circle-fill me-1"></i>Valid
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

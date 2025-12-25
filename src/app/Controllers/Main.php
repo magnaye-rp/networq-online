@@ -17,7 +17,11 @@ class Main extends BaseController
 
     public function index()
     {
-        $data['projects'] = $this->projectModel->getProjectsWithImages();
+        try {
+            $data['projects'] = $this->projectModel->getProjectsWithImages();
+        } catch (\Exception $e) {
+            $data['projects'] = [];
+        }
         return view('dashboard/index', $data);
     }
 }

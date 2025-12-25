@@ -22,7 +22,6 @@ services:
   db:
     image: mysql:8.0
     platform: linux/amd64
-    container_name: farmease-db
     # CRITICAL FIX: Disable SSL and set auth method to fix initial connection errors
     command: --default-authentication-plugin=mysql_native_password --ssl=0
     environment:
