@@ -5,15 +5,18 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\ProjectListModel;
 use App\Models\ProjectImagesModel;
+use App\Models\CertificatesModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class Admin extends BaseController
 {
     protected $projectModel;
+    protected $certificatesModel;
 
     public function __construct()
     {
         $this->projectModel = new ProjectListModel();
+        $this->certificatesModel = new CertificatesModel();
     }
 
     public function index()
@@ -23,6 +26,7 @@ class Admin extends BaseController
         }
 
         $data['projects'] = $this->projectModel->getProjectsWithImages();
+        $data['certificates'] = $this->certificatesModel->getAllCertificates();
         return view('admin/index', $data);
     }
 
@@ -95,9 +99,7 @@ class Admin extends BaseController
             }
         }
 
-// Debug: Check final result
-// print_r($imagesData);
-// echo "Total files processed: $count";
+
         
         $result = $this->projectModel->addProjectWithImages($projectData, $imagesData);
 
@@ -117,6 +119,80 @@ class Admin extends BaseController
         }
 
         return redirect()->to('/admin')->with('success', 'Project deleted successfully!');
+    }
+
+    public function createCertificate()
+    {
+        if (!auth()->loggedIn()) {
+            return redirect()->to('/login');
+        }
+
+        $certificateData = [
+            'name' => $this->request->getPost('name'),
+            'description' => $this->request->getPost('description'),
+            'issued_by' => $this->request->getPost('issued_by'),
+            'date_issued' => $this->request->getPost('date_issued'),
+            'date_expiry' => $this->request->getPost('date_expiry') ?: null,
+        ];
+
+        // Handle certificate image upload
+        $uploadPath = FCPATH . 'uploads/certificates/';
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0755, true);
+        }
+
+        $file = $this->request->getFile('image');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            
+            if (in_array($file->getMimeType(), $allowedTypes) && $file->getSize() <= 5 * 1024 * 1024) {
+                $newName = $file->getRandomName();
+                if ($file->move($uploadPath, $newName)) {
+                    $certificateData['image_path'] = 'uploads/certificates/' . $newName;
+                }
+            }
+        }
+
+        try {
+            if ($this->certificatesModel->addCertificate($certificateData)) {
+                return redirect()->to('/admin')->with('success', 'Certificate added successfully!');
+            } else {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Failed to add certificate. Please try again.');
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Certificate creation error: ' . $e->getMessage());
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Failed to add certificate. Please try again.');
+        }
+    }
+
+    public function deleteCertificate($id)
+    {
+        if (!auth()->loggedIn()) {
+            return redirect()->to('/login');
+        }
+
+        $certificate = $this->certificatesModel->find($id);
+        if (!$certificate) {
+            return redirect()->to('/admin')->with('error', 'Certificate not found.');
+        }
+
+        // Delete image file if exists
+        if (!empty($certificate['image_path'])) {
+            $imagePath = FCPATH . $certificate['image_path'];
+            if (file_exists($imagePath)) {
+                unlink($imagePath);
+            }
+        }
+
+        if ($this->certificatesModel->delete($id)) {
+            return redirect()->to('/admin')->with('success', 'Certificate deleted successfully!');
+        } else {
+            return redirect()->to('/admin')->with('error', 'Failed to delete certificate.');
+        }
     }
 
     public function logout()

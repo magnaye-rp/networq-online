@@ -302,19 +302,27 @@
 
     .certificate-image-container {
         position: relative;
-        height: 240px;
+        height: 320px;
         overflow: hidden;
         background-color: var(--bg-soft);
         display: flex;
         align-items: center;
         justify-content: center;
+        border-radius: 0.5rem;
     }
 
     .certificate-image {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
+        object-position: center;
         transition: transform 0.3s ease;
+        cursor: pointer;
+        border-radius: 0.5rem;
+    }
+
+    .certificate-image:hover {
+        transform: scale(1.02);
     }
 
     .certificate-card:hover .certificate-image {
@@ -593,6 +601,66 @@
         box-shadow: 0 6px 20px rgba(0,0,0,0.35);
     }
 
+    /* Certificate Modal Styles */
+    .certificate-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .certificate-modal.show {
+        display: flex;
+        opacity: 1;
+    }
+
+    .certificate-modal-content {
+        max-width: 90vw;
+        max-height: 90vh;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .certificate-modal-image {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .certificate-modal-close {
+        position: absolute;
+        top: -40px;
+        right: 0;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s ease;
+    }
+
+    .certificate-modal-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
     /* Mobile Responsiveness */
     @media (max-width: 768px) {
         .hero-title {
@@ -711,7 +779,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-12 text-center">
-                    <div class="avatar-container">
+                    <div class="avatar-container mt-5">
                         👨‍💻
                     </div>
 
@@ -857,153 +925,67 @@
             </p>
 
             <div class="row g-4">
-                <!-- AWS Solutions Architect -->
-                <div class="col-md-6">
-                    <div class="certificate-card">
-                        <div class="certificate-image-container">
-                            <div class="certificate-placeholder">
-                                <i class="bi bi-award-fill"></i>
+                <?php foreach ($certificates as $certificate): ?>
+                    <div class="col-md-6">
+                        <div class="certificate-card">
+                            <div class="certificate-image-container">
+                                <?php if (!empty($certificate['image_path'])): ?>
+                                    <img src="<?= base_url(esc($certificate['image_path'])) ?>" 
+                                        class="certificate-image" 
+                                        alt="<?= esc($certificate['name']) ?> Certificate"
+                                        loading="lazy">
+                                <?php else: ?>
+                                    <div class="certificate-placeholder">
+                                        <i class="bi bi-award-fill"></i>
+                                    </div>
+                                <?php endif; ?>
                             </div>
-                        </div>
-                        
-                        <div class="certificate-content">
-                            <h3 class="certificate-title">AWS Certified Solutions Architect</h3>
+                            
+                            <div class="certificate-content">
+                                <h3 class="certificate-title"><?= esc($certificate['name']) ?> Certificate</h3>
 
-                            <p class="certificate-description">
-                                Demonstrates expertise in designing distributed systems and applications on the AWS platform. 
-                                Covers architecture best practices, security, and cost optimization strategies.
-                            </p>
+                                <p class="certificate-description">
+                                    <?= esc($certificate['description']) ?>
+                                </p>
 
-                            <div class="certificate-dates">
-                                <div class="date-item">
-                                    <i class="bi bi-calendar-check"></i>
-                                    <span class="date-label">Issued:</span>
-                                    <span>January 2024</span>
+                                <div class="certificate-dates">
+                                    <div class="date-item">
+                                        <i class="bi bi-calendar-check"></i>
+                                        <span class="date-label">Issued:</span>
+                                        <span><?= esc(date('F Y', strtotime($certificate['date_issued']))) ?></span>
+                                    </div>
+                                    <?php if (!empty($certificate['date_expiry'])): ?>
+                                        <div class="date-item">
+                                            <i class="bi bi-calendar-x"></i>
+                                            <span class="date-label">Expires:</span>
+                                            <span><?= esc(date('F Y', strtotime($certificate['date_expiry']))) ?></span>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="date-item">
+                                            <i class="bi bi-calendar-check"></i>
+                                            <span class="date-label">Expires:</span>
+                                            <span>No Expiry Date</span>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
-                                <div class="date-item">
-                                    <i class="bi bi-calendar-x"></i>
-                                    <span class="date-label">Expires:</span>
-                                    <span>January 2027</span>
+                                <div class="issuer-name">
+                                    <strong>Issuer:</strong> <?= esc($certificate['issued_by']) ?>
+
                                 </div>
+                                <?php
+                                    $isExpired = !empty($certificate['date_expiry']) && strtotime($certificate['date_expiry']) < time();
+                                ?>
+                                <span class="certificate-status <?= $isExpired ? 'status-expired' : 'status-valid' ?>">
+                                    <?php if ($isExpired): ?>
+                                        <i class="bi bi-x-circle-fill me-1"></i>Expired
+                                    <?php else: ?>
+                                        <i class="bi bi-check-circle-fill me-1"></i>Valid
+                                    <?php endif; ?>
+                                </span>
                             </div>
-
-                            <span class="certificate-status status-valid">
-                                <i class="bi bi-check-circle-fill me-1"></i>Valid
-                            </span>
                         </div>
                     </div>
-                </div>
-
-                <!-- PHP Professional Certification -->
-                <div class="col-md-6">
-                    <div class="certificate-card">
-                        <div class="certificate-image-container">
-                            <div class="certificate-placeholder">
-                                <i class="bi bi-code-slash"></i>
-                            </div>
-                        </div>
-                        
-                        <div class="certificate-content">
-                            <h3 class="certificate-title">PHP Professional Certification</h3>
-
-                            <p class="certificate-description">
-                                Advanced certification covering modern PHP development practices, 
-                                security best practices, and framework utilization for enterprise applications.
-                            </p>
-
-                            <div class="certificate-dates">
-                                <div class="date-item">
-                                    <i class="bi bi-calendar-check"></i>
-                                    <span class="date-label">Issued:</span>
-                                    <span>March 2023</span>
-                                </div>
-                                <div class="date-item">
-                                    <i class="bi bi-calendar-x"></i>
-                                    <span class="date-label">Expires:</span>
-                                    <span>March 2026</span>
-                                </div>
-                            </div>
-
-                            <span class="certificate-status status-valid">
-                                <i class="bi bi-check-circle-fill me-1"></i>Valid
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Docker Containerization Specialist -->
-                <div class="col-md-6">
-                    <div class="certificate-card">
-                        <div class="certificate-image-container">
-                            <div class="certificate-placeholder">
-                                <i class="bi bi-box-seam"></i>
-                            </div>
-                        </div>
-                        
-                        <div class="certificate-content">
-                            <h3 class="certificate-title">Docker Containerization Specialist</h3>
-
-                            <p class="certificate-description">
-                                Specialized certification in container technologies, covering Docker containerization, 
-                                orchestration, and deployment strategies for scalable applications.
-                            </p>
-
-                            <div class="certificate-dates">
-                                <div class="date-item">
-                                    <i class="bi bi-calendar-check"></i>
-                                    <span class="date-label">Issued:</span>
-                                    <span>September 2023</span>
-                                </div>
-                                <div class="date-item">
-                                    <i class="bi bi-calendar-x"></i>
-                                    <span class="date-label">Expires:</span>
-                                    <span>September 2025</span>
-                                </div>
-                            </div>
-
-                            <span class="certificate-status status-valid">
-                                <i class="bi bi-check-circle-fill me-1"></i>Valid
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CodeIgniter 4 Framework Expert -->
-                <div class="col-md-6">
-                    <div class="certificate-card">
-                        <div class="certificate-image-container">
-                            <div class="certificate-placeholder">
-                                <i class="bi bi-gear-fill"></i>
-                            </div>
-                        </div>
-                        
-                        <div class="certificate-content">
-                            <h3 class="certificate-title">CodeIgniter 4 Framework Expert</h3>
-
-                            <p class="certificate-description">
-                                Expert-level certification demonstrating mastery of CodeIgniter 4 framework, 
-                                MVC architecture, and advanced PHP development patterns for web applications.
-                            </p>
-
-                            <div class="certificate-dates">
-                                <div class="date-item">
-                                    <i class="bi bi-calendar-check"></i>
-                                    <span class="date-label">Issued:</span>
-                                    <span>November 2023</span>
-                                </div>
-                                <div class="date-item">
-                                    <i class="bi bi-calendar-x"></i>
-                                    <span class="date-label">Expires:</span>
-                                    <span>November 2026</span>
-                                </div>
-                            </div>
-
-                            <span class="certificate-status status-valid">
-                                <i class="bi bi-check-circle-fill me-1"></i>Valid
-                            </span>
-                        </div>
-                    </div>
-                </div>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>
@@ -1144,6 +1126,16 @@
     <button class="help-button" id="darkModeToggle" title="Toggle Dark Mode">
         <i class="bi bi-moon-stars-fill"></i>
     </button>
+
+    <!-- Certificate Modal -->
+    <div class="certificate-modal" id="certificateModal">
+        <div class="certificate-modal-content">
+            <button class="certificate-modal-close" id="closeCertificateModal" title="Close">
+                <i class="bi bi-x"></i>
+            </button>
+            <img src="" alt="Certificate" class="certificate-modal-image" id="certificateModalImage">
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -1322,6 +1314,67 @@
                 }
             }, 5000);
         }
+
+        // Certificate Modal Functionality
+        function initCertificateModal() {
+            const modal = document.getElementById('certificateModal');
+            const modalImage = document.getElementById('certificateModalImage');
+            const closeButton = document.getElementById('closeCertificateModal');
+            const certificateImages = document.querySelectorAll('.certificate-image');
+
+            // Add click event listeners to certificate images
+            certificateImages.forEach(image => {
+                image.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const imageSrc = this.src;
+                    const imageAlt = this.alt;
+                    
+                    modalImage.src = imageSrc;
+                    modalImage.alt = imageAlt;
+                    modal.classList.add('show');
+                    
+                    // Prevent body scroll when modal is open
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+
+            // Close modal when clicking close button
+            closeButton.addEventListener('click', function() {
+                closeModal();
+            });
+
+            // Close modal when clicking outside the image
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+
+            // Close modal with escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.classList.contains('show')) {
+                    closeModal();
+                }
+            });
+
+            function closeModal() {
+                modal.classList.remove('show');
+                // Restore body scroll
+                document.body.style.overflow = '';
+                
+                // Clear image source after transition
+                setTimeout(() => {
+                    if (!modal.classList.contains('show')) {
+                        modalImage.src = '';
+                    }
+                }, 300);
+            }
+        }
+
+        // Initialize certificate modal when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initCertificateModal();
+        });
     </script>
 </body>
 </html>

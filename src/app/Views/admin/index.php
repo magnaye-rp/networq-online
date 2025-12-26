@@ -236,6 +236,42 @@
             color: var(--text-muted);
         }
 
+        .certificate-card {
+            background: var(--bg-soft);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .certificate-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .certificate-image {
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .certificate-image:hover {
+            transform: scale(1.02);
+        }
+
+        .certificate-details {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin: 1rem 0;
+        }
+
+        .certificate-details div {
+            margin-bottom: 0.25rem;
+        }
+
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
             .container-main {
@@ -246,7 +282,8 @@
                 padding: 1.5rem;
             }
             
-            .project-card {
+            .project-card,
+            .certificate-card {
                 padding: 1rem;
             }
             
@@ -278,6 +315,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" href="/admin">Projects</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#certificates">Certificates</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= site_url("logout")?>">
@@ -394,6 +434,71 @@
             </form>
         </div>
 
+        <!-- Add Certificate Form -->
+        <div class="section-card">
+            <h2 class="section-title">
+                <i class="bi bi-award me-2"></i>Add New Certificate
+            </h2>
+            
+            <form method="POST" action="<?= site_url('admin/createCertificate') ?>" enctype="multipart/form-data">
+                <?= csrf_field() ?>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Certificate Name *</label>
+                            <input type="text" class="form-control" id="name" name="name" 
+                                   value="<?= old('name') ?>" required 
+                                   placeholder="Enter certificate name">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="issued_by" class="form-label">Issued By *</label>
+                            <input type="text" class="form-control" id="issued_by" name="issued_by" 
+                                   value="<?= old('issued_by') ?>" required 
+                                   placeholder="e.g., Google, Microsoft, Coursera">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description *</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" 
+                              required placeholder="Describe what this certificate covers..."><?= old('description') ?></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="date_issued" class="form-label">Date Issued *</label>
+                            <input type="date" class="form-control" id="date_issued" name="date_issued" 
+                                   value="<?= old('date_issued') ?>" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="date_expiry" class="form-label">Date Expiry</label>
+                            <input type="date" class="form-control" id="date_expiry" name="date_expiry" 
+                                   value="<?= old('date_expiry') ?>">
+                            <div class="form-text">Leave empty if certificate doesn't expire</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Certificate Image Upload -->
+                <div class="mb-4">
+                    <label for="image" class="form-label">Certificate Image</label>
+                    <input type="file" class="form-control" id="image" name="image" 
+                           accept="image/jpeg,image/jpg,image/png,image/gif">
+                    <div class="form-text">Supported formats: JPG, PNG, GIF. Maximum size: 5mb</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-award me-2"></i>Add Certificate
+                </button>
+            </form>
+        </div>
+
         <!-- Projects List -->
         <div class="section-card">
             <h2 class="section-title">
@@ -459,6 +564,67 @@
                                     <form method="POST" action="/admin/delete/<?= $project['id'] ?>" 
                                           style="display: inline;" 
                                           onsubmit="return confirm('Are you sure you want to delete this project?')">
+                                        <button type="submit" class="btn-custom btn-danger">
+                                            <i class="bi bi-trash me-1"></i>Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <!-- Certificates List -->
+        <div class="section-card" id="certificates">
+            <h2 class="section-title">
+                <i class="bi bi-award me-2"></i>Certificate List
+            </h2>
+
+            <?php if (empty($certificates)): ?>
+                <div class="empty-state">
+                    <i class="bi bi-award"></i>
+                    <h4>No certificates yet</h4>
+                    <p>Add your first certificate using the form above.</p>
+                </div>
+            <?php else: ?>
+                <div class="row">
+                    <?php foreach ($certificates as $certificate): ?>
+                        <div class="col-lg-6">
+                            <div class="certificate-card">
+                                <h3 class="project-title"><?= esc($certificate['name']) ?></h3>
+                                <p class="project-description"><?= esc($certificate['description']) ?></p>
+                                
+                                <!-- Certificate Image -->
+                                <?php if (!empty($certificate['image_path'])): ?>
+                                    <div class="certificate-image mb-3">
+                                        <img src="/<?= esc($certificate['image_path']) ?>" 
+                                             alt="Certificate image" 
+                                             class="img-fluid"
+                                             style="height: 120px; width: 100%; object-fit: cover;">
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <div class="tech-badges">
+                                    <span class="tech-badge">
+                                        <i class="bi bi-building me-1"></i><?= esc($certificate['issued_by']) ?>
+                                    </span>
+                                </div>
+
+                                <div class="certificate-details">
+                                    <div><strong>Issued:</strong> <?= date('M d, Y', strtotime($certificate['date_issued'])) ?></div>
+                                    <?php if ($certificate['date_expiry']): ?>
+                                        <div><strong>Expires:</strong> <?= date('M d, Y', strtotime($certificate['date_expiry'])) ?></div>
+                                    <?php else: ?>
+                                        <div><strong>Expires:</strong> No expiry date</div>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <div class="project-links">
+                                    <form method="POST" action="/admin/deleteCertificate/<?= $certificate['id'] ?>" 
+                                          style="display: inline;" 
+                                          onsubmit="return confirm('Are you sure you want to delete this certificate?')">
                                         <button type="submit" class="btn-custom btn-danger">
                                             <i class="bi bi-trash me-1"></i>Delete
                                         </button>
