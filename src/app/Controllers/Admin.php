@@ -195,6 +195,62 @@ class Admin extends BaseController
         }
     }
 
+    public function updateProfilePic()
+    {
+        if (!auth()->loggedIn()) {
+            return redirect()->to('/login');
+        }
+
+        $file = $this->request->getFile('profile_pic');
+        
+        if (!$file || !$file->isValid()) {
+            return redirect()->back()
+                ->with('error', 'Please select a valid image file.');
+        }
+
+        // Check file type
+        $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        if (!in_array($file->getMimeType(), $allowedTypes)) {
+            return redirect()->back()
+                ->with('error', 'Only JPG, PNG, and GIF images are allowed.');
+        }
+
+        // Check file size (2MB limit)
+        if ($file->getSize() > 2 * 1024 * 1024) {
+            return redirect()->back()
+                ->with('error', 'Image size must be less than 2MB.');
+        }
+
+        // Create uploads directory if it doesn't exist
+        $uploadPath = FCPATH . 'uploads/';
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0755, true);
+        }
+
+        // Static filename: profile-pic.jpg (will overwrite existing file)
+        $staticFilename = 'profile-pic.jpg';
+        $targetPath = $uploadPath . $staticFilename;
+
+        try {
+            // Remove old profile picture if exists
+            if (file_exists($targetPath)) {
+                unlink($targetPath);
+            }
+
+            // Move the uploaded file with static name
+            if ($file->move($uploadPath, $staticFilename)) {
+                return redirect()->to('/admin')->with('success', 'Profile picture updated successfully!');
+            } else {
+                return redirect()->back()
+                    ->with('error', 'Failed to upload profile picture. Please try again.');
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Profile picture upload error: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'An error occurred while updating profile picture.');
+        }
+    }
+
     public function logout()
     {
         auth()->logout();

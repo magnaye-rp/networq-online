@@ -6,6 +6,8 @@
     <title>Portfolio - Ryan Paulo Magnaye</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="icon" type="image/x-icon" href="<?= base_url('favicon.ico') ?>">
+
 <style>
     :root {
         /* Brand */
@@ -62,6 +64,10 @@
         font-weight: 500;
         margin-left: 2rem;
         transition: color 0.3s;
+    }
+
+    .portfolio-text:hover {
+        color: var(--orange-primary);
     }
 
     .nav-link:hover {
@@ -748,7 +754,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="#home">Portfolio</a>
+            <a class="navbar-brand portfolio-text" href="#home">Portfolio</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -780,7 +786,17 @@
             <div class="row">
                 <div class="col-12 text-center">
                     <div class="avatar-container mt-5">
-                        👨‍💻
+                        <?php 
+                        $profilePicPath = 'uploads/profile-pic.jpg';
+                        $profilePicExists = file_exists(FCPATH . 'uploads/profile-pic.jpg');
+                        if ($profilePicExists): ?>
+                            <img src="/uploads/profile-pic.jpg" 
+                                 alt="Profile Picture" 
+                                 class="img-fluid rounded-circle"
+                                 style="width: 100%; height: 100%; object-fit: cover;">
+                        <?php else: ?>
+                            👨‍💻
+                        <?php endif; ?>
                     </div>
 
                     <h1 class="hero-title">
@@ -826,7 +842,7 @@
             </p>
 
             <div class="row g-4">
-                <?php foreach ($projects as $project): ?>
+                <?php foreach ($projectsLimited as $project): ?>
                 <div class="col-md-6">
                     <div class="project-card">
                         <div class="project-image-container">
@@ -913,6 +929,106 @@
                 </div>
                 <?php endforeach; ?>
             </div>
+
+            <?php if ($hasMoreProjects): ?>
+                <div class="text-center mt-4">
+                    <button class="btn btn-outline-custom" id="seeMoreProjects">
+                        <i class="bi bi-eye me-2"></i>See More Projects (<?= $totalProjects - 4 ?> more)
+                    </button>
+                </div>
+
+                <!-- Hidden container for additional projects -->
+                <div id="additionalProjects" class="row g-4" style="display: none;">
+                    <?php 
+                    $additionalProjects = array_slice($projects, 4);
+                    foreach ($additionalProjects as $project): ?>
+                    <div class="col-md-6">
+                        <div class="project-card">
+                            <div class="project-image-container">
+                                <!-- Use unique ID for each carousel -->
+                                <div id="carousel-<?= $project['id'] ?>" class="carousel slide" data-bs-ride="carousel">
+                                    <div class="carousel-inner">
+                                        <?php if (empty($project['images'])): ?>
+                                            <!-- Default if no images -->
+                                            <div class="carousel-item active">
+                                                <img src="https://via.placeholder.com/800x450?text=No+Image" 
+                                                    class="d-block w-100 project-image" 
+                                                    alt="<?= esc($project['project_name']) ?>">
+                                            </div>
+                                        <?php else: ?>
+                                            <?php foreach ($project['images'] as $index => $image): ?>
+                                                <div class="carousel-item <?= ($index === 0) ? 'active' : '' ?>">
+                                                    <img src="<?= base_url(esc($image['image_path'])) ?>" 
+                                                        class="d-block w-100 project-image" 
+                                                        alt="<?= esc($project['project_name']) ?> - Image <?= $index + 1 ?>"
+                                                        loading="lazy">
+                                                </div>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <?php if (!empty($project['images']) && count($project['images']) > 1): ?>
+                                        <!-- Controls -->
+                                        <button class="carousel-control-prev" type="button" 
+                                                data-bs-target="#carousel-<?= $project['id'] ?>" 
+                                                data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                            <span class="visually-hidden">Previous</span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" 
+                                                data-bs-target="#carousel-<?= $project['id'] ?>" 
+                                                data-bs-slide="next">
+                                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                            <span class="visually-hidden">Next</span>
+                                        </button>
+                                        
+                                        <!-- Indicators -->
+                                        <div class="carousel-indicators">
+                                            <?php foreach ($project['images'] as $index => $image): ?>
+                                                <button type="button" 
+                                                        data-bs-target="#carousel-<?= $project['id'] ?>" 
+                                                        data-bs-slide-to="<?= $index ?>" 
+                                                        class="<?= ($index === 0) ? 'active' : '' ?>" 
+                                                        aria-label="Slide <?= $index + 1 ?>"></button>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            
+                            <!-- Project details here -->
+                            <div class="project-content">
+                                <h3 class="project-title"><?= esc($project['project_name']) ?></h3>
+
+                                <p class="project-description">
+                                    <?= esc($project['description']) ?>
+                                </p>
+
+                                <div class="tech-badges">
+                                    <?php 
+                                    $techs = explode(',', $project['technology_stack']);
+                                    foreach ($techs as $tech): 
+                                    ?>
+                                        <span class="tech-badge"><?= esc(trim($tech)) ?></span>
+                                    <?php endforeach; ?>
+                                </div>
+
+                                <div class="project-links">
+                                    <a href="<?= esc($project['github_link']) ?>" target="_blank" class="btn btn-project">
+                                        <i class="bi bi-github me-1"></i>Code
+                                    </a>
+                                    <?php if (!empty($project['live_demo_link'])): ?>
+                                    <a href="<?= esc($project['live_demo_link']) ?>" target="_blank" class="btn btn-project">
+                                        <i class="bi bi-box-arrow-up-right me-1"></i>Live Demo
+                                    </a>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </section>
 
@@ -925,7 +1041,7 @@
             </p>
 
             <div class="row g-4">
-                <?php foreach ($certificates as $certificate): ?>
+                <?php foreach ($certificatesLimited as $certificate): ?>
                     <div class="col-md-6">
                         <div class="certificate-card">
                             <div class="certificate-image-container">
@@ -987,6 +1103,81 @@
                     </div>
                 <?php endforeach; ?>
             </div>
+
+            <?php if ($hasMoreCertificates): ?>
+                <div class="text-center mt-4">
+                    <button class="btn btn-outline-custom" id="seeMoreCertificates">
+                        <i class="bi bi-eye me-2"></i>See More Certificates (<?= $totalCertificates - 4 ?> more)
+                    </button>
+                </div>
+
+                <!-- Hidden container for additional certificates -->
+                <div id="additionalCertificates" class="row g-4" style="display: none;">
+                    <?php 
+                    $additionalCertificates = array_slice($certificates, 4);
+                    foreach ($additionalCertificates as $certificate): ?>
+                        <div class="col-md-6">
+                            <div class="certificate-card">
+                                <div class="certificate-image-container">
+                                    <?php if (!empty($certificate['image_path'])): ?>
+                                        <img src="<?= base_url(esc($certificate['image_path'])) ?>" 
+                                            class="certificate-image" 
+                                            alt="<?= esc($certificate['name']) ?> Certificate"
+                                            loading="lazy">
+                                    <?php else: ?>
+                                        <div class="certificate-placeholder">
+                                            <i class="bi bi-award-fill"></i>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <div class="certificate-content">
+                                    <h3 class="certificate-title"><?= esc($certificate['name']) ?> Certificate</h3>
+
+                                    <p class="certificate-description">
+                                        <?= esc($certificate['description']) ?>
+                                    </p>
+
+                                    <div class="certificate-dates">
+                                        <div class="date-item">
+                                            <i class="bi bi-calendar-check"></i>
+                                            <span class="date-label">Issued:</span>
+                                            <span><?= esc(date('F Y', strtotime($certificate['date_issued']))) ?></span>
+                                        </div>
+                                        <?php if (!empty($certificate['date_expiry'])): ?>
+                                            <div class="date-item">
+                                                <i class="bi bi-calendar-x"></i>
+                                                <span class="date-label">Expires:</span>
+                                                <span><?= esc(date('F Y', strtotime($certificate['date_expiry']))) ?></span>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="date-item">
+                                                <i class="bi bi-calendar-check"></i>
+                                                <span class="date-label">Expires:</span>
+                                                <span>No Expiry Date</span>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="issuer-name">
+                                        <strong>Issuer:</strong> <?= esc($certificate['issued_by']) ?>
+
+                                    </div>
+                                    <?php
+                                        $isExpired = !empty($certificate['date_expiry']) && strtotime($certificate['date_expiry']) < time();
+                                    ?>
+                                    <span class="certificate-status <?= $isExpired ? 'status-expired' : 'status-valid' ?>">
+                                        <?php if ($isExpired): ?>
+                                            <i class="bi bi-x-circle-fill me-1"></i>Expired
+                                        <?php else: ?>
+                                            <i class="bi bi-check-circle-fill me-1"></i>Valid
+                                        <?php endif; ?>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </section>
 
@@ -1371,10 +1562,59 @@
             }
         }
 
-        // Initialize certificate modal when DOM is loaded
+        // Initialize certificate modal and see more functionality when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
             initCertificateModal();
+            initSeeMoreCertificates();
+            initSeeMoreProjects();
         });
+
+        // See More Certificates functionality
+        function initSeeMoreCertificates() {
+            const seeMoreBtn = document.getElementById('seeMoreCertificates');
+            const additionalCertificates = document.getElementById('additionalCertificates');
+            
+            if (seeMoreBtn && additionalCertificates) {
+                seeMoreBtn.addEventListener('click', function() {
+                    // Show additional certificates
+                    additionalCertificates.style.display = 'block';
+                    
+                    // Hide the see more button
+                    seeMoreBtn.style.display = 'none';
+                    
+                    // Re-initialize certificate modal for the new certificates
+                    setTimeout(() => {
+                        initCertificateModal();
+                    }, 100);
+                    
+                    // Smooth scroll to the newly revealed certificates
+                    additionalCertificates.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                });
+            }
+        }
+
+        // See More Projects functionality
+        function initSeeMoreProjects() {
+            const seeMoreBtn = document.getElementById('seeMoreProjects');
+            const additionalProjects = document.getElementById('additionalProjects');
+            
+            if (seeMoreBtn && additionalProjects) {
+                seeMoreBtn.addEventListener('click', function() {
+                    // Show additional projects
+                    additionalProjects.style.display = 'block';
+
+                    seeMoreBtn.style.display = 'none';
+
+                    additionalProjects.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                });
+            }
+        }
     </script>
 </body>
 </html>

@@ -6,6 +6,8 @@
     <title>Admin - Project Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="icon" type="image/x-icon" href="<?= base_url('favicon.ico') ?>">
+
     <style>
         :root {
             /* Brand */
@@ -343,6 +345,47 @@
                 <i class="bi bi-exclamation-triangle me-2"></i><?= session()->getFlashdata('error') ?>
             </div>
         <?php endif; ?>
+
+        <!-- Profile Picture Update -->
+        <div class="section-card">
+            <h2 class="section-title">
+                <i class="bi bi-person-circle me-2"></i>Update Profile Picture
+            </h2>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <!-- Current Profile Picture -->
+                    <div class="text-center mb-3">
+                        <?php 
+                        $profilePicPath = 'uploads/profile-pic.jpg';
+                        $defaultPicPath = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDE1MCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiBmaWxsPSIjMkUyOTNCIi8+CjxjaXJjbGUgY3g9Ijc1IiBjeT0iNjAiIHI9IjMwIiBmaWxsPSIjRjk3MzE2Ii8+CjxwYXRoIGQ9Ik0yNSAxMjBDMjUgMTAwIDQyLjUgODUgNzUgODVTMTI1IDEwMCAxMjUgMTIwVjE1MEgyNVoiIGZpbGw9IiNGOTczMTYiLz4KPC9zdmc+';
+                        $profilePicExists = file_exists(FCPATH . 'uploads/profile-pic.jpg');
+                        ?>
+                        <img src="<?= $profilePicExists ? '/uploads/profile-pic.jpg' : $defaultPicPath ?>" 
+                             alt="Profile Picture" 
+                             class="img-fluid rounded-circle"
+                             style="width: 150px; height: 150px; object-fit: cover; border: 4px solid var(--border-color);">
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <form method="POST" action="<?= site_url('admin/updateProfilePic') ?>" enctype="multipart/form-data">
+                        <?= csrf_field() ?>
+                        <div class="mb-3">
+                            <label for="profile_pic" class="form-label">Choose New Profile Picture</label>
+                            <input type="file" class="form-control" id="profile_pic" name="profile_pic" 
+                                   accept="image/jpeg,image/jpg,image/png,image/gif" required>
+                            <div class="form-text">
+                                Supported formats: JPG, PNG, GIF. Maximum size: 2mb. 
+                                This will replace the current profile picture.
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-upload me-2"></i>Update Profile Picture
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
 
         <!-- Add Project Form -->
         <div class="section-card">
