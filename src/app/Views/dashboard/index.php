@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio - Ryan Paulo Magnaye</title>
+    <title>Ryan Paulo Magnaye | Official Portfolio | Backend Software Developer</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="icon" type="image/x-icon" href="<?= base_url('favicon.ico') ?>">
+    <link rel="icon" href="<?= base_url('favicon-dark.ico') ?>" type="image/x-icon" id="favicon">
+    <meta name="msvalidate.01" content="57C2D28715E5FCC8211B41CD62FA37C5" />
+    <meta name="description" content="Ryan Paulo Magnaye – Web developer portfolio showcasing projects in CodeIgniter, OAuth, Docker, and secure web applications.">
 
 <style>
     :root {
@@ -1381,6 +1383,17 @@
             });
         });
 
+        // Favicon switching function
+        function updateFavicon() {
+            const favicon = document.getElementById('favicon');
+            if (favicon) {
+                const isLightMode = document.body.classList.contains('light-mode');
+                favicon.href = isLightMode 
+                    ? '<?= base_url('favicon-light.ico') ?>' 
+                    : '<?= base_url('favicon-dark.ico') ?>';
+            }
+        }
+
         // Dark mode toggle
         const toggle = document.getElementById('darkModeToggle');
         const toggleIcon = document.querySelector('#darkModeToggle i');
@@ -1395,6 +1408,9 @@
                 toggleIcon.className = 'bi bi-sun-fill';
             }
             
+            // Update favicon
+            updateFavicon();
+            
             // Save preference
             localStorage.setItem(
                 'theme',
@@ -1407,6 +1423,9 @@
             document.body.classList.add('light-mode');
             toggleIcon.className = 'bi bi-sun-fill';
         }
+        
+        // Update favicon on page load
+        updateFavicon();
 
         // Contact form handling
         document.getElementById('contactForm').addEventListener('submit', async function(e) {
@@ -1616,5 +1635,22 @@
             }
         }
     </script>
+
+    <script type="application/ld+json">
+        {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Ryan Paulo Magnaye",
+        "url": "https://rpmagnaye.networq.online",
+        "sameAs": [
+            "https://github.com/magnaye-rp",
+            "https://www.linkedin.com/in/magnaye-rp",
+            "https://www.facebook.com/bruhdacious",
+            "https://www.instagram.com/bruhdacious"
+        ],
+        "jobTitle": "Web Developer"
+        }
+        </script>
+
 </body>
 </html>

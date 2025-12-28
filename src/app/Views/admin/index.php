@@ -6,25 +6,34 @@
     <title>Admin - Project Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="icon" type="image/x-icon" href="<?= base_url('favicon.ico') ?>">
+    <link rel="icon" href="<?= base_url('favicon-dark.ico') ?>" type="image/x-icon" id="favicon">
 
     <style>
-        :root {
-            /* Brand */
-            --blue-primary: #0b3c5d;
-            --blue-secondary: #1d4ed8;
-            --orange-primary: #f97316;
-            --orange-dark: #ea580c;
+    :root {
+        /* Brand */
+        --blue-primary: #0b3c5d;
+        --blue-secondary: #1d4ed8;
+        --orange-primary: #f97316;
+        --orange-dark: #ea580c;
 
-            /* Dark Mode */
-            --bg-main: #0f172a;
-            --bg-soft: #020617;
-            --text-main: #e5e7eb;
-            --text-muted: #94a3b8;
-            --card-bg: #020617;
-            --border-color: #1e293b;
-            
-        }
+        /* Dark Mode */
+        --bg-main: #0f172a;
+        --bg-soft: #020617;
+        --text-main: #e5e7eb;
+        --text-muted: #94a3b8;
+        --card-bg: #020617;
+        --border-color: #1e293b;
+        
+    }
+
+    body.light-mode {
+        --bg-main: #ffffff;
+        --bg-soft: #f9fafb;
+        --text-main: #1f2937;
+        --text-muted: #6b7280;
+        --card-bg: #ffffff;
+        --border-color: #e5e7eb;
+    }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
@@ -320,6 +329,11 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#certificates">Certificates</a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link btn btn-link" id="darkModeToggle" title="Toggle Dark Mode">
+                            <i class="bi bi-sun-fill"></i>
+                        </button>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= site_url("logout")?>">
@@ -696,6 +710,50 @@
                 }, 5000);
             });
         });
+
+        // Favicon switching function
+        function updateFavicon() {
+            const favicon = document.getElementById('favicon');
+            if (favicon) {
+                const isLightMode = document.body.classList.contains('light-mode');
+                favicon.href = isLightMode 
+                    ? '<?= base_url('favicon-light.ico') ?>' 
+                    : '<?= base_url('favicon-dark.ico') ?>';
+            }
+        }
+
+        // Dark mode toggle functionality
+        const toggle = document.getElementById('darkModeToggle');
+        const toggleIcon = document.querySelector('#darkModeToggle i');
+
+        toggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            
+            // Change icon
+            if (document.body.classList.contains('light-mode')) {
+                toggleIcon.className = 'bi bi-moon-stars-fill';
+            } else {
+                toggleIcon.className = 'bi bi-sun-fill';
+            }
+            
+            // Update favicon
+            updateFavicon();
+            
+            // Save preference
+            localStorage.setItem(
+                'theme',
+                document.body.classList.contains('light-mode') ? 'light' : 'dark'
+            );
+        });
+
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+            toggleIcon.className = 'bi bi-moon-stars-fill';
+        }
+        
+        // Update favicon on page load
+        updateFavicon();
     </script>
 </body>
 </html>

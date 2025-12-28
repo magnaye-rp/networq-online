@@ -6,7 +6,7 @@
     <title>Login - Ryan Paulo Magnaye Portfolio</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="icon" type="image/x-icon" href="<?= base_url('favicon.ico') ?>">
+    <link rel="icon" href="<?= base_url('favicon-dark.ico') ?>" type="image/x-icon" id="favicon">
 
 <style>
     :root {
@@ -435,6 +435,43 @@
                 }
             });
         }, 5000);
+
+        // Favicon switching function
+        function updateFavicon() {
+            const favicon = document.getElementById('favicon');
+            if (favicon) {
+                const isLightMode = document.body.classList.contains('light-mode');
+                favicon.href = isLightMode 
+                    ? '<?= base_url('favicon-light.ico') ?>' 
+                    : '<?= base_url('favicon-dark.ico') ?>';
+            }
+        }
+
+        // Theme toggle functionality for login page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for saved theme preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+            }
+            
+            // Update favicon on page load
+            updateFavicon();
+            
+            // Add theme toggle functionality if needed
+            // This can be triggered by a button or automatically based on system preference
+            const isDarkModePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (!savedTheme) {
+                // If no saved preference, use system preference
+                if (isDarkModePreferred) {
+                    document.body.classList.remove('light-mode');
+                } else {
+                    document.body.classList.add('light-mode');
+                }
+                updateFavicon();
+            }
+        });
     </script>
 </body>
 </html>
