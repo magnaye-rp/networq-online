@@ -45,6 +45,10 @@ class CreateCertificatesTable extends Migration
                 'type'    => 'DATETIME',
                 'null'    => true,
             ],
+            'is_priority' => [
+                'type'       => 'BOOLEAN',
+                'default'    => false,
+            ],
         ]);
         $this->forge->addKey('id', true);
         $this->forge->createTable('certificates');
@@ -53,5 +57,13 @@ class CreateCertificatesTable extends Migration
     public function down()
     {
         $this->forge->dropTable('certificates');
+    }
+
+    public function getCertificatesByPriority()
+    {
+        $builder = $this->db->table('certificates');
+        $builder->orderBy('is_priority', 'DESC');
+        $query = $builder->get();
+        return $query->getResultArray();
     }
 }

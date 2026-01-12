@@ -63,6 +63,7 @@ class ProjectListModel extends Model
             $imagesBuilder = $this->db->table('project_images');
             $imagesBuilder->select('image_path, uploaded_at');
             $imagesBuilder->where('project_id', $project['id']);
+            $imagesBuilder->where('is_featured', true);
             $imagesBuilder->orderBy('uploaded_at', 'ASC');
             $imagesQuery = $imagesBuilder->get();
             $project['images'] = $imagesQuery->getResultArray();

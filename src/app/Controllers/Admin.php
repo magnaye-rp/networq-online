@@ -26,7 +26,7 @@ class Admin extends BaseController
         }
 
         $data['projects'] = $this->projectModel->getProjectsWithImages();
-        $data['certificates'] = $this->certificatesModel->getAllCertificates();
+        $data['certificates'] = $this->certificatesModel->getCertificatesByPriority();
         return view('admin/index', $data);
     }
 

@@ -46,6 +46,10 @@ class CreateProjectList extends Migration
                 'type'    => 'DATETIME',
                 'null'    => true,
             ],
+            'is_featured' => [
+                'type'       => 'BOOLEAN',
+                'default'    => false,
+            ],
         ]);
         $this->forge->addKey('id', true);
         $this->forge->createTable('project_list');
