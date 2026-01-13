@@ -85,12 +85,57 @@ class ProjectListModel extends Model
             foreach ($imagesData as &$image) {
                 $image['project_id'] = $projectId;
             }
-            
+
             $this->db->table('project_images')->insertBatch($imagesData);
         }
 
         $this->db->transComplete();
 
         return $this->db->transStatus() ? $projectId : false;
+    }
+
+    /**
+     * Update project with images
+     */
+    function updateProjectWithImages($projectId, $projectData, $imagesData = [])
+    {
+        $this->db->transStart();
+
+        // Update project data
+        $this->update($projectId, $projectData);
+
+        // Insert new images if any
+        if (!empty($imagesData)) {
+            foreach ($imagesData as &$image) {
+                $image['project_id'] = $projectId;
+            }
+            $this->db->table('project_images')->insertBatch($imagesData);
+        }
+
+        $this->db->transComplete();
+
+        return $this->db->transStatus();
+    }
+
+    /**
+     * Get a single project by ID with all its images
+     */
+    function getProjectWithAllImages($projectId)
+    {
+        $project = $this->find($projectId);
+
+        if (!$project) {
+            return null;
+        }
+
+        // Get all images for the project
+        $imagesBuilder = $this->db->table('project_images');
+        $imagesBuilder->select('*');
+        $imagesBuilder->where('project_id', $projectId);
+        $imagesBuilder->orderBy('uploaded_at', 'ASC');
+        $imagesQuery = $imagesBuilder->get();
+        $project['images'] = $imagesQuery->getResultArray();
+
+        return $project;
     }
 }

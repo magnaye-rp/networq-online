@@ -604,22 +604,25 @@
                                 <?php endif; ?>
 
                                 <div class="project-links">
+                                    <a href="/admin/edit/<?= $project['id'] ?>" class="btn-custom btn-outline">
+                                        <i class="bi bi-pencil me-1"></i>Edit
+                                    </a>
                                     <?php if ($project['github_link']): ?>
-                                        <a href="<?= esc($project['github_link']) ?>" 
+                                        <a href="<?= esc($project['github_link']) ?>"
                                            target="_blank" class="btn-custom btn-outline">
                                             <i class="bi bi-github me-1"></i>GitHub
                                         </a>
                                     <?php endif; ?>
-                                    
+
                                     <?php if ($project['live_demo_link']): ?>
-                                        <a href="<?= esc($project['live_demo_link']) ?>" 
+                                        <a href="<?= esc($project['live_demo_link']) ?>"
                                            target="_blank" class="btn-custom btn-primary">
                                             <i class="bi bi-eye me-1"></i>Live Demo
                                         </a>
                                     <?php endif; ?>
-                                    
-                                    <form method="POST" action="/admin/delete/<?= $project['id'] ?>" 
-                                          style="display: inline;" 
+
+                                    <form method="POST" action="/admin/delete/<?= $project['id'] ?>"
+                                          style="display: inline;"
                                           onsubmit="return confirm('Are you sure you want to delete this project?')">
                                         <button type="submit" class="btn-custom btn-danger">
                                             <i class="bi bi-trash me-1"></i>Delete

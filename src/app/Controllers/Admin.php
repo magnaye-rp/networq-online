@@ -12,11 +12,13 @@ class Admin extends BaseController
 {
     protected $projectModel;
     protected $certificatesModel;
+    protected $imagesModel;
 
     public function __construct()
     {
         $this->projectModel = new ProjectListModel();
         $this->certificatesModel = new CertificatesModel();
+        $this->imagesModel = new ProjectImagesModel();
     }
 
     public function index()
@@ -119,6 +121,138 @@ class Admin extends BaseController
         }
 
         return redirect()->to('/admin')->with('success', 'Project deleted successfully!');
+    }
+
+    public function edit($id)
+    {
+        if (!auth()->loggedIn()) {
+            return redirect()->to('/login');
+        }
+
+        $project = $this->projectModel->getProjectWithAllImages($id);
+
+        if (!$project) {
+            return redirect()->to('/admin')->with('error', 'Project not found.');
+        }
+
+        $data['project'] = $project;
+        return view('admin/edit_project', $data);
+    }
+
+    public function update($id)
+    {
+        if (!auth()->loggedIn()) {
+            return redirect()->to('/login');
+        }
+
+        // Validate project exists
+        $project = $this->projectModel->find($id);
+        if (!$project) {
+            return redirect()->to('/admin')->with('error', 'Project not found.');
+        }
+
+        $projectData = [
+            'project_name' => $this->request->getPost('project_name'),
+            'description' => $this->request->getPost('description'),
+            'technology_stack' => $this->request->getPost('technology_stack'),
+            'github_link' => $this->request->getPost('github_link') ?: null,
+            'live_demo_link' => $this->request->getPost('live_demo_link') ?: null,
+        ];
+
+        $uploadPath = FCPATH . 'uploads/projects/';
+
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0755, true);
+        }
+
+        // Get all uploaded files
+        $files = $this->request->getFiles();
+        $imagesData = [];
+
+        foreach ($files as $key => $fileArray) {
+            if (!is_array($fileArray)) {
+                $fileArray = [$fileArray];
+            }
+
+            foreach ($fileArray as $index => $file) {
+                if (!is_object($file) || !$file->isValid()) {
+                    continue;
+                }
+
+                $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+
+                try {
+                    if (!in_array($file->getMimeType(), $allowedTypes)) {
+                        continue;
+                    }
+                    if ($file->getSize() > 5 * 1024 * 1024) {
+                        continue;
+                    }
+
+                    $newName = $file->getRandomName();
+
+                    if ($file->move($uploadPath, $newName)) {
+                        $imagesData[] = [
+                            'image_path' => 'uploads/projects/' . $newName,
+                            'uploaded_at' => date('Y-m-d H:i:s')
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    log_message('error', 'Error processing file: ' . $e->getMessage());
+                    continue;
+                }
+            }
+        }
+
+        try {
+            $result = $this->projectModel->updateProjectWithImages($id, $projectData, $imagesData);
+
+            if ($result) {
+                $imageCount = count($imagesData);
+                $message = 'Project updated successfully!';
+                if ($imageCount > 0) {
+                    $message .= " Added {$imageCount} new image(s).";
+                }
+                return redirect()->to('/admin/edit/' . $id)->with('success', $message);
+            } else {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Failed to update project. Please try again.');
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Project update error: ' . $e->getMessage());
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Failed to update project. Please try again.');
+        }
+    }
+
+    public function deleteImage($id)
+    {
+        if (!auth()->loggedIn()) {
+            return redirect()->to('/login');
+        }
+
+        $image = $this->imagesModel->find($id);
+
+        if (!$image) {
+            return redirect()->back()->with('error', 'Image not found.');
+        }
+
+        $projectId = $image['project_id'];
+
+        // Delete image file
+        $imagePath = FCPATH . $image['image_path'];
+        if (file_exists($imagePath)) {
+            unlink($imagePath);
+        }
+
+        // Delete image record
+        if ($this->imagesModel->delete($id)) {
+            return redirect()->to('/admin/edit/' . $projectId)->with('success', 'Image deleted successfully!');
+        } else {
+            return redirect()->to('/admin/edit/' . $projectId)->with('error', 'Failed to delete image.');
+        }
     }
 
     public function createCertificate()

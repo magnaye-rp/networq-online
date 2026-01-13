@@ -45,6 +45,46 @@ class ProjectImagesModel extends Model
     protected $afterUpdate    = [];
     protected $beforeFind     = [];
     protected $afterFind      = [];
-    protected $beforeDelete   = [];
-    protected $afterDelete    = [];
+    protected $beforeDelete    = [];
+    protected $afterDelete     = [];
+
+    /**
+     * Get all images for a specific project
+     */
+    public function getImagesByProjectId($projectId)
+    {
+        $builder = $this->db->table($this->table);
+        $builder->select('*');
+        $builder->where('project_id', $projectId);
+        $builder->orderBy('uploaded_at', 'ASC');
+        $query = $builder->get();
+        return $query->getResultArray();
+    }
+
+    /**
+     * Delete all images for a specific project
+     */
+    public function deleteImagesByProjectId($projectId)
+    {
+        return $this->where('project_id', $projectId)->delete();
+    }
+
+    /**
+     * Delete a single image by ID
+     */
+    public function deleteImage($imageId)
+    {
+        return $this->where('id', $imageId)->delete();
+    }
+
+    /**
+     * Delete specific images by their IDs
+     */
+    public function deleteImagesByIds(array $imageIds)
+    {
+        if (empty($imageIds)) {
+            return true;
+        }
+        return $this->whereIn('id', $imageIds)->delete();
+    }
 }
